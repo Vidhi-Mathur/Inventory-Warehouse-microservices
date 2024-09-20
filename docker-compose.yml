@@ -1,0 +1,34 @@
+services:
+  inventory:
+    build:
+      context: ./inventory
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./inventory/.env
+    networks:
+      - app-network
+
+  user:
+    build:
+      context: ./user
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./user/.env
+    networks:
+      - app-network
+
+  warehouse:
+    build:
+      context: ./warehouse
+    ports:
+      - "3003:3003"
+    env_file:
+      - ./warehouse/.env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
