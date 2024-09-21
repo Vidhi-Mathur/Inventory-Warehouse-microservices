@@ -1,8 +1,6 @@
 const axios = require('axios')
 const Warehouse = require('../models/warehouse-model')
-/* Fix remaining for inventory reference 
-const Inventory = require('../models/inventory-model') */
-const { getInventoryById } = require('../services/inventory-service');
+const { getInventoryById, deleteInventoryByWarehouseId } = require('../services/inventory-service');
 const { getUserById } = require('../services/user-service');
 
 //Create warehouse
@@ -14,10 +12,20 @@ exports.createWarehouse = async(req, res, next) => {
         if(result.data.length === 0) return res.status(400).json({message: 'Invalid location'});
         const { lat, lon } = result.data[0];
         // Find associated inventory
-        const inventoryItems = await Inventory.find({ _id: { $in: inventoryStored } });
-        // Check if all inventory items were found
-        if(inventoryItems.length !== inventoryStored.length) {
-            return res.status(404).json({message: 'Not all inventory items found'});
+        const inventoryItems = [];
+        for (const inventoryId of inventoryStored){
+            try {
+                const inventoryResponse = await getInventoryById(inventoryId)
+                if (inventoryResponse.status === 200 && inventoryResponse.data.product) {
+                    inventoryItems.push(inventoryResponse.data.product);
+                } 
+                else {
+                    return res.status(404).json({ message: `Inventory item with ID ${inventoryId} not found` });
+                }
+            } 
+            catch(err) {
+                return res.status(500).json({ message: `Error retrieving inventory item with ID ${inventoryId}`});
+            }
         }
         // Get username from warehouse, and save corresponding warehouse there
         const user = req.session.user;
@@ -130,7 +138,7 @@ exports.deleteWarehouse = async(req, res, next) => {
         deleteWarehouse = await Warehouse.findById(id);
         if (!deleteWarehouse) return res.status(404).json({message: 'No warehouse found'});
         // Remove inventory associated with deleted warehouse
-        await Inventory.deleteMany({ warehouse: id });
+        await deleteInventoryByWarehouseId(id);
         // Remove warehouse from the user who owns it
         const owner = deleteWarehouse.user;
         const correspondingUser = await getUserById(owner);

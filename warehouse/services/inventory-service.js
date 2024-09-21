@@ -5,7 +5,17 @@ exports.getInventoryById = async(productId) => {
         const response = await axios.get(`http://localhost:3001/inventory/${productId}`);
         return response.product
     }
-    catch(error) {
+    catch(err) {
+        next(err)
+    }
+}
+
+exports.deleteInventoryByWarehouseId = async(warehouseId) => {
+    try {
+        const response = await axios.delete(`http://localhost:3001/inventory/${warehouseId}`);
+        return response.message
+    }
+    catch(err) {
         next(err)
     }
 }

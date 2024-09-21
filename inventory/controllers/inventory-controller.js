@@ -101,23 +101,34 @@ exports.updateProduct = async(req, res, next) => {
 }
 
 //Delete inventory item
-exports.deleteProduct = async(req, res, next) => {
-   const { id } = req.params;
+exports.deleteProductByProductId = async(req, res, next) => {
+   const { productId } = req.params;
    let deleteInventory;
    try {
-      deleteInventory = await Inventory.findById(id);
+      deleteInventory = await Inventory.findById(productId);
       // No id found
       if (!deleteInventory) {
         return res.status(404).json({ message: "No product found for given id"})
       }
       const warehouse = await getWarehouseById(deleteInventory.warehouse);
       // Remove reference of same inventory stored with Warehouse model, and save
-      warehouse.inventoryStored = warehouse.inventoryStored.filter(item => item.toString() !== id);
+      warehouse.inventoryStored = warehouse.inventoryStored.filter(item => item.toString() !== productId);
       await warehouse.save()
-      await Inventory.findByIdAndDelete(id);
-      res.status(200).json({message: `Deleted product with id ${id}`});
+      await Inventory.findByIdAndDelete(productId);
+      res.status(200).json({message: `Deleted product with id ${productId}`});
    } 
-   catch (err) {
+   catch(err) {
       next(err)
    }
+}
+
+exports.deleteProductByWarehouseId = async(req, res, next) => {
+    try {
+        const { warehouseId } = req.params
+        await Inventory.deleteMany({ warehouse: warehouseId });
+        res.status(200).json({message: "Deleted inventories from warehouse"})
+    }
+    catch(err) {
+        next(err)
+    }
 }

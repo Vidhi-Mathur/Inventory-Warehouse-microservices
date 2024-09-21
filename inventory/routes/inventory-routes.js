@@ -14,7 +14,10 @@ router.post('/new', invertoryController.createProduct)
 //Update specific inventory item
 router.patch('/:id', invertoryController.updateProduct)
 
-//Delete inventory item
-router.delete('/:id', invertoryController.deleteProduct)
+//Delete inventory item based on ProductId
+router.delete('/:productId', invertoryController.deleteProductByProductId)
+
+//Delete inventory item based on warehouseId
+router.delete('/:warehouseId', invertoryController.deleteProductByWarehouseId)
 
 module.exports = router
