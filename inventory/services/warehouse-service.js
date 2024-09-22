@@ -11,6 +11,15 @@ exports.getWarehouseById = async(warehouseId) => {
     }
 };
 
+exports.getWarehouseByInventoryId = async(inventoryId) => {
+    try {
+        const response = await axios.get(`http://localhost:3003/warehouse/${inventoryId}`);
+        return response.warehouse;
+    } 
+    catch(error) {
+        next(err)
+    }
+}
 
 //Find all warehouses for user(find) - GET /warehouse
 exports.getWarehouses = async() => {
@@ -23,7 +32,14 @@ exports.getWarehouses = async() => {
     }
 };
 
-
-//Find warehouse by id and update(findByIdAndUpdate) - PATCH /warehouse/:id
-
-//Find warehouse such that in Warehouse, ObjectId of inventoryStored[] matched what we searched(findOne)
+exports.updateInventoryInWarehouse = async(warehouseId, inventoryStored) => {
+    try {
+        const response = await axios.patch(`http://localhost:3003/warehouse/${warehouseId}`, {
+            inventoryStored
+        });
+        return response.warehouse;
+    } 
+    catch(error) {
+        next(err)
+    }
+}

@@ -1,7 +1,5 @@
 const Inventory = require('../models/inventory-model')
-/* Fix remaining for warehouse reference
-const Warehouse = require('../models/warehouse-model'); */
-const { getWarehouseById, getWarehouses } = require("../services/warehouse-service")
+const { getWarehouseById, getWarehouses, getWarehouseByInventoryId, updateInventoryInWarehouse } = require("../services/warehouse-service")
 
 exports.createProduct = async (req, res, next) => {
    try {
@@ -21,9 +19,7 @@ exports.createProduct = async (req, res, next) => {
        await newProduct.save();
        //Update inventoryStored[] in warehouse
        reqWarehouse.inventoryStored.push(newProduct._id);
-       await Warehouse.findByIdAndUpdate(reqWarehouse._id, {
-           inventoryStored: reqWarehouse.inventoryStored
-       });
+       await updateInventoryInWarehouse(reqWarehouse.id, reqWarehouse.inventoryStored)
        //Return response
        res.status(200).json({ product: newProduct });
    } 
@@ -72,7 +68,7 @@ exports.updateProduct = async(req, res, next) => {
    inventory = await Inventory.findById(id)
    if(!inventory) return res.status(404).json({ message: 'Inventory Not found'})
    //Find warehouse such that in Warehouse, ObjectId of inventoryStored[] matched what we searched
-   oldWarehouse = await Warehouse.findOne({ inventoryStored: inventory._id });
+   oldWarehouse = await getWarehouseByInventoryId(id)
    if(!oldWarehouse) return res.status(404).json({ message: 'Warehouse Not found'})
    //Update
    inventory.title = title

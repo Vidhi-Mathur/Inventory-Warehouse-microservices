@@ -153,3 +153,28 @@ exports.deleteWarehouse = async(req, res, next) => {
         next(err)
     }
 }
+
+exports.getWarehouseByInventoryId = async(req, res, next) => {
+    try {
+        const { inventoryId } = req.params
+        const warehouse = await Warehouse.findOne({ inventoryStored: inventoryId });
+        return res.status(200).json({ warehouse })
+    }
+    catch(err) {
+        next(err)
+    }
+}
+
+exports.updateInventoryInWarehouse = async(req, res, next) => {
+    try {
+        const { warehouseId } = req.params
+        const { inventoryStored } = req.body
+        const warehouse = await Warehouse.findByIdAndUpdate(warehouseId, {
+            inventoryStored
+        });
+        return res.status(200).json({ warehouse })
+    }
+    catch(err) {
+        next(err)
+    }
+}
